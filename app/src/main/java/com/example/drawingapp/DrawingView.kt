@@ -70,6 +70,11 @@ class DrawingView(context: Context, attrs: AttributeSet) : View(context, attrs) 
         mDrawPaint!!.strokeWidth = mBrushSize
     }
 
+    fun setColor(newColor: String){
+        color = Color.parseColor(newColor)
+        mDrawPaint?.color = color
+    }
+
     override fun onTouchEvent(event: MotionEvent?): Boolean {
 
         val touchX = event?.x
