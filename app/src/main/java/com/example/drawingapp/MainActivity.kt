@@ -1,18 +1,61 @@
 package com.example.drawingapp
 
+import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.Toast
+import android.widget.*
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.get
 
 class MainActivity : AppCompatActivity() {
+
+    private val multiplePermissionLauncher: ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(
+            ActivityResultContracts.RequestMultiplePermissions()
+        )
+        { permissions ->
+            permissions.entries.forEach {
+                val permissionName = it.key
+                val isGranted = it.value
+                if (isGranted) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "Permission granted now you can read the storage files",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    if (permissionName == android.Manifest.permission.READ_EXTERNAL_STORAGE) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Oops, you just denied permission.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
+            }
+        }
+
+    /*
+    private val requestPermission: ActivityResultLauncher<String> =
+        registerForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        )
+        { isGranted ->
+            if (isGranted) {
+                Toast.makeText(this, "granted", Toast.LENGTH_LONG).show()
+            } else {
+                Toast.makeText(this, "not granted", Toast.LENGTH_LONG).show()
+            }
+        }
+
+     */
+
 
     private var drawingView: DrawingView? = null
     private var mImageButtonCurrentPaint: ImageButton? = null
@@ -38,7 +81,60 @@ class MainActivity : AppCompatActivity() {
             showingBrushSizeChooserDialog()
         }
 
+        findViewById<ImageView>(R.id.ib_image_file).setOnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA)
+            ) {
+                Toast.makeText(
+                    this,
+                    "AAA", Toast.LENGTH_LONG
+                ).show()
+            } else {
+                /*
+                permis.launch(android.Manifest.permission.CAMERA)
+                 */
+                multiplePermissionLauncher.launch(
+                    arrayOf(
+                        android.Manifest.permission.CAMERA,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION
+                    )
+                )
+            }
+        }
 
+        findViewById<ImageView>(R.id.ib_image_file).setOnClickListener {
+            requestStoragePermission()
+        }
+
+    }
+
+    private fun requestStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        ) {
+            showRationaleDialog(
+                "Drawing App", "Drawing App needs to access your internal storage"
+            )
+        } else {
+            multiplePermissionLauncher.launch(
+                arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+            )
+        }
+    }
+
+    private fun showRationaleDialog(
+        title: String,
+        message: String
+    ) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+        builder.create().show()
     }
 
     private fun showingBrushSizeChooserDialog() {
