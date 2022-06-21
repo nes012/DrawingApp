@@ -3,6 +3,9 @@ package com.example.drawingapp
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
@@ -128,6 +131,7 @@ class MainActivity : AppCompatActivity() {
             drawingView?.onClickUndo()
         }
 
+
     }
 
     private fun requestStoragePermission() {
@@ -200,5 +204,20 @@ class MainActivity : AppCompatActivity() {
 
             mImageButtonCurrentPaint = view
         }
+    }
+
+    private fun getBitmapFromView(view: View): Bitmap {
+        val returnedBitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(returnedBitmap)
+        val bgDrawable = view.background
+        if (bgDrawable != null) {
+            bgDrawable.draw(canvas)
+        } else {
+            canvas.drawColor(Color.WHITE)
+        }
+
+        view.draw(canvas)
+
+        return returnedBitmap
     }
 }
