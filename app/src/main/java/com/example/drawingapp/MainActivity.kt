@@ -124,6 +124,10 @@ class MainActivity : AppCompatActivity() {
             requestStoragePermission()
         }
 
+        findViewById<ImageView>(R.id.ib_undo).setOnClickListener {
+            drawingView?.onClickUndo()
+        }
+
     }
 
     private fun requestStoragePermission() {
